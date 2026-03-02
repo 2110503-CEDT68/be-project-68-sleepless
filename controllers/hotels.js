@@ -29,7 +29,7 @@ exports.getHotels= async (req,res,next) => {
     const startIndex=(page-1)*limit;
     const endIndex=page*limit;
     try{
-        const total=await Hospital.countDocuments();
+       const total = await Hotel.countDocuments();
         query=query.skip(startIndex).limit(limit);
 
         const hotels = await query;
@@ -59,7 +59,7 @@ exports.getHotels= async (req,res,next) => {
 
 exports.getHotel=async (req,res,next) => {
     try{
-        const hotel = await Hotels.findById(req.params.id);
+        const hotel = await Hotel.findById(req.params.id);
         
         if(!hotel){
             return res.status(400).json({success:false});
@@ -110,7 +110,7 @@ exports.deleteHotel= async (req, res,next) => {
             });
         }
 
-        await Booking.deleteMany({hospital:req.params.id});
+        await Booking.deleteMany({hotel:req.params.id});
         await Hotel.deleteOne({_id: req.params.id});
 
         res.status(200).json({success:true, data: {}});

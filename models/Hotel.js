@@ -44,4 +44,4 @@ HotelSchema.virtual('bookings', {
     justOne:false
 });
 
-module.exports=mongoose.model('Hotel',HotelSchema);
+module.exports = mongoose.model('Hotel', HotelSchema, 'hotel999');
