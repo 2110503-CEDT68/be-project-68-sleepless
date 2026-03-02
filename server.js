@@ -1,3 +1,6 @@
+const { setServers } = require("node:dns/promises");
+setServers(["1.1.1.1", "8.8.8.8"]);
+
 const express = require('express');
 const dotenv = require('dotenv');
 const cookieParser=require('cookie-parser');
@@ -7,7 +10,7 @@ const helmet=require('helmet');
 const {xss} = require('express-xss-sanitizer');
 const rateLimit = require('express-rate-limit');
 const limiter=rateLimit({
-    windowsMs: 10*60*1000,
+    windowMs: 10 * 60 * 1000,
     max: 100
 });
 const hpp = require('hpp');
@@ -35,11 +38,11 @@ app.set('query parser', 'extended');
 
 const hotels = require(`./routes/hotels`);
 const auth = require('./routes/auth');
-const appointments = require('./routes/appointments');
+const bookings = require('./routes/bookings');
 
 app.use('/api/v1/hotels', hotels);
 app.use('/api/v1/auth', auth);
-app.use('/api/v1/appointments',appointments);
+app.use('/api/v1/bookings',bookings);
 
 const PORT=process.env.PORT || 5000;
 
