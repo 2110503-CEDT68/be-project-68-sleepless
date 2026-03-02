@@ -9,7 +9,7 @@ exports.getBookings = async (req, res, next) => {
         // User ทั่วไป: ค้นหาเฉพาะ { user: ID ของตัวเอง }
         query = Booking.find({ user: req.user.id }).populate({
             path: 'hotel', // ชื่อฟิลด์ต้องตรงกับ Model
-            select: 'name province tel'
+            select: 'hotel_name address telephone'
         });
     } else {
    
