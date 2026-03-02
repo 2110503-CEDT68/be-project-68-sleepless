@@ -64,6 +64,27 @@ exports.getBooking = async(req,res,next) => {
 
 exports.addBooking = async (req,res,next)=>{
     try{
+        const { checkInDate, checkOutDate } = req.body;
+
+        if (!checkInDate || !checkOutDate) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide both check-in and check-out dates"
+            });
+        }
+
+        const checkIn = new Date(checkInDate);
+        const checkOut = new Date(checkOutDate);
+        
+        const diffTime = checkOut - checkIn;
+        const diffNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffNights > 3) {
+            return res.status(400).json({
+                success: false,
+                message: `Booking cannot exceed 3 nights. You requested ${diffNights} nights.`
+            });
+        }
         req.body.hotel = req.params.hotelId;
 
         const hotel = await Hotel.findById(req.params.hotelId);
