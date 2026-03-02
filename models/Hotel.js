@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const HotelSchema = new mongoose.Schema({
-    name: {
+    hotel_name: {
         type: String,
         required: [true, 'Please add a name'],
         unique: true,
@@ -25,7 +25,7 @@ const HotelSchema = new mongoose.Schema({
         required: [true,'Please add a postalcode'],
         maxlength:[5, 'Postal Code can not be more tahn 5 digits']
     },
-    tel:{
+    telephone:{
         type: String
     },
     region:{

@@ -1,63 +1,83 @@
 const Booking = require('../models/Booking');
 const Hotel = require('../models/Hotel');
 
-exports.getBookings=async (req,res,next)=>{
+exports.getBookings = async (req, res, next) => {
     let query;
-    if(req.user.role !== 'admin'){
-        query = Booking.find({user:req.user.id}).populate({
-            path:'hotel',
-            select:'name province tel'
+
+    // 1. กรองข้อมูล (Filtering): ถ้าไม่ใช่ Admin ให้เห็นเฉพาะของตัวเอง
+    if (req.user.role !== 'admin') {
+        // User ทั่วไป: ค้นหาเฉพาะ { user: ID ของตัวเอง }
+        query = Booking.find({ user: req.user.id }).populate({
+            path: 'hotel', // ชื่อฟิลด์ต้องตรงกับ Model
+            select: 'name province tel'
         });
-    }else {
-        if(req.params.hotelId){
-            console.log(req.params.hotelId);
-            query = Booking.find({hotel:req.params.hotelId}).populate({
-                path:"hotel",
-                select:"name province tel",
+    } else {
+   
+        if (req.params.hotelId) {
+            query = Booking.find({ hotel: req.params.hotelId }).populate({
+                path: 'hotel',
+                select: 'hotel_name address telephone'
             });
-        }else {
-            query=Booking.find().populate({
-                path:'hotel',
-                select:'name province tel'
+            
+        } else {
+            query = Booking.find().populate({
+                path: 'hotel',
+                select: 'hotel_name address telephone'
             });
         }
     }
-    try{
+
+    try {
         const bookings = await query;
+
         res.status(200).json({
-            success:true,
-            count:bookings.length,
-            data:bookings
+            success: true,
+            count: bookings.length,
+            data: bookings
         });
-    } catch(error){
+    } catch (error) {
         console.log(error);
-        return res.status(500).json({success:false, message: "Cannot find Booking"});
+        return res.status(500).json({ 
+            success: false, 
+            message: "Cannot find Booking" 
+        });
     }
 };
 
-exports.getBooking = async(req,res,next) => {
-    try{
+
+exports.getBooking = async (req, res, next) => {
+    try {
+        
         const booking = await Booking.findById(req.params.id).populate({
-            path:'hotels',
-            select:'name description tel'
+            path: 'hotel', 
+            select: 'hotel_name address telephone'
         });
 
-        if(!booking){
+       
+        if (!booking) {
             return res.status(404).json({
-                success:false,
+                success: false,
                 message: `No booking with the id of ${req.params.id}`
             });
         }
 
+       
+        if (booking.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(401).json({
+                success: false,
+                message: `User ${req.user.id} is not authorized to view this booking`
+            });
+        }
+
         res.status(200).json({
-            success:true,
+            success: true,
             data: booking
         });
-    } catch(error){
+    } catch (error) {
         console.log(error);
         return res.status(500).json({
-            success:false,
-            message:"Cannot find Booking"
+            success: false,
+            message: "Cannot find Booking"
         });
     }
 };
