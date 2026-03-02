@@ -84,10 +84,18 @@ exports.getBooking = async (req, res, next) => {
 
 exports.addBooking = async (req, res, next) => {
     try {
-        
+        // 1. ตรวจสอบว่าเอา Hotel ID มาจากไหน (URL หรือ Body)
+        const hotelId = req.params.hotelId || req.body.hotel;
+
+        if (!hotelId) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide a hotel ID either in URL or in Body"
+            });
+        }
+
+        // 2. ตรวจสอบวันที่ (เหมือนเดิม)
         const { checkInDate, checkOutDate } = req.body;
-
-
         if (!checkInDate || !checkOutDate) {
             return res.status(400).json({
                 success: false,
@@ -95,11 +103,10 @@ exports.addBooking = async (req, res, next) => {
             });
         }
 
-
+        // 3. คำนวณจำนวนคืน (เหมือนเดิม)
         const checkIn = new Date(checkInDate);
         const checkOut = new Date(checkOutDate);
-        const diffTime = checkOut - checkIn;
-        const diffNights = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffNights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
 
         if (diffNights > 3) {
             return res.status(400).json({
@@ -108,20 +115,20 @@ exports.addBooking = async (req, res, next) => {
             });
         }
 
-
-        req.body.hotel = req.params.hotelId;
+        // 4. เตรียมข้อมูลลง Body เพื่อบันทึก
+        req.body.hotel = hotelId; // ใช้ hotelId ที่หาได้จากข้อ 1
         req.body.user = req.user.id;
 
-  
-        const hotel = await Hotel.findById(req.params.hotelId);
+        // 5. ตรวจสอบว่าโรงแรมมีอยู่จริงไหม
+        const hotel = await Hotel.findById(hotelId);
         if (!hotel) {
             return res.status(404).json({
                 success: false,
-                message: `No hotel with the id of ${req.params.hotelId}`
+                message: `No hotel with the id of ${hotelId}`
             });
         }
 
-
+        // 6. บันทึก
         const booking = await Booking.create(req.body);
 
         res.status(200).json({
